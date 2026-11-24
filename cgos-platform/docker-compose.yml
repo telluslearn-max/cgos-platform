@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  # CGOS Application
+  cgos:
+    build: .
+    container_name: cgos
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/cgos"
+      NODE_ENV: "production"
+      OPENSEO_DEPLOYED_URL: "https://seo.nuruelectronics.com"
+      OPENSEO_API_TOKEN: "${OPENSEO_API_TOKEN}"
+      OPENSEO_INTEGRATION_STATUS: "connected"
+      OPENSEO_SYNC_FREQUENCY: "daily"
+      NEXTAUTH_URL: "https://cgos.yourdomain.com"
+      NEXTAUTH_URL_INTERNAL: "http://localhost:3000"
+    ports:
+      - "3000:80"
+    env_files:
+      - .env
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: cgos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cgos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_files:
+      - .env
+
+volumes:
+  postgres_data:

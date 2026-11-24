@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Core identity and access
+// ---------------------------------------------------------------------------
+
+enum Role {
+  admin
+  manager
+  viewer
+  integration_manager
+}
+
+model Tenant {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  industry      String?
+  businessModel String?
+  website       String?
+  location      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users         User[]
+}
+
+// Simplified User model
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String?
+  imageUrl         String?
+  emailVerifiedAt  DateTime?
+  role             Role      @default(viewer)
+  status           String    @default("active")
+  lastSignedInAt   DateTime?
+  twoFactorEnabled Boolean   @default(false)
+  preferences      Json?
+  tenant           Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  tenantId         String?   // Foreign key to Tenant
+
+  sessions         UserSession[]
+}
+
+// User session
+model UserSession {
+  id            String   @id @default(cuid())
+  userId        String
+  tokenHash     String   @unique
+  expiresAt     DateTime
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Tenant subscription
+model TenantSubscription {
+  id             String @id @default(cuid())
+  tenantId       String
+  plan           String   @default("starter")
+  status         String   @default("active")
+  features       Json
+  billingCycle   String   @default("monthly")
+  currentPeriod  DateTime @default(now())
+  cancelAt       DateTime?
+  canceledAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Business profile
+// ---------------------------------------------------------------------------
+
+model BusinessProfile {
+  id              String   @id @default(cuid())
+  tenantId        String
+  businessName    String
+  industry        String?
+  businessModel   String?
+  website         String?
+  location        String?
+  targetCustomers String?
+  primaryProducts String?
+  brandPositioning String?
+  brandTone       String?
+  marketingObjectives String?
+  competitors     String?   // JSON list
+  marketingChannels String?   // JSON list
+  commercialPriorities Json?    // JSON
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Commerce integrations
+// ---------------------------------------------------------------------------
+
+model Integration {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String   // e.g. "Shopify", "WooCommerce"
+  type            String   // e.g. "commerce", "social", "seo"
+  status          String   // e.g. "connected", "error"
+  connectionConfig Json
+  credentials      Json?    // encrypted
+  lastSyncAt      DateTime?
+  lastError       String?
+  syncFrequency   String   @default("daily")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Product catalogue - core tables only
+// ---------------------------------------------------------------------------
+
+enum ProductStatus {
+  draft
+  active
+  archived
+  excluded
+}
+
+model Product {
+  id                String        @id @default(cuid())
+  tenantId          String
+  handle              String        @unique
+  title               String
+  description         String        @default("")
+  category            String?
+  brand               String?
+  vendor              String?
+  productType         String        @default("")
+  tags                String[]
+  options             Json          @default("[]")
+  seoTitle            String?
+  seoDescription      String?
+  status              ProductStatus @default(active)
+  sellingPrice        Decimal       @db.Decimal(10, 2)
+  costPrice           Decimal?      @db.Decimal(10, 2)
+  stockQuantity       Int           @default(0)
+  trackInventory      Boolean       @default(true)
+  allowBackorder      Boolean       @default(false)
+  sku                 String?       @unique
+  barcode             String?
+  availability        String        @default("in_stock")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model ProductMedia {
+  id          String   @id @default(cuid())
+  productId   String
+  url         String
+  altText     String?
+  width       Int
+  height      Int
+  createdAt   DateTime @default(now())
+}
+
+model ProductVariant {
+  id               String   @id @default(cuid())
+  productId        String
+  title            String   @default("Default Title")
+  position         Int      @default(0)
+  sku              String?  @unique
+  price            Decimal  @db.Decimal(10, 2)
+  compareAtPrice   Decimal? @db.Decimal(10, 2)
+  costPrice        Decimal? @db.Decimal(10, 2)
+  selectedOptions  Json     @default("[]")
+  trackInventory   Boolean  @default(true)
+  allowBackorder   Boolean  @default(false)
+  stockQuantity    Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model StockMovement {
+  id             String   @id @default(cuid())
+  variantId      String
+  delta          Int
+  reason         String
+  createdAt      DateTime @default(now())
+}
+
+model CartLine {
+  id        String   @id @default(cuid())
+  cartId    String
+  variantId String
+  quantity  Int
+
+  @@unique([cartId, variantId])
+}
+
+model Cart {
+  id           String   @id @default(cuid())
+  currencyCode String   @default("KES")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SupplierItem {
+  id             String   @id @default(cuid())
+  supplierId     String
+  variantId      String?
+  supplierSku    String   @unique
+  description    String
+  cost           Decimal  @db.Decimal(10, 2)
+  rrp            Decimal? @db.Decimal(10, 2)
+  createdAt      DateTime @default(now())
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Product intelligence
+// ---------------------------------------------------------------------------
+
+model ProductAnalysis {
+  id                String    @id @default(cuid())
+  productId         String
+  marketingStatus   String
+  opportunityScore  Decimal   @db.Decimal(5, 2)
+  bundlePotential   Decimal   @db.Decimal(5, 2)
+  lifecycleCategory String
+  lastAnalyzedAt    DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Listing proposals
+// ---------------------------------------------------------------------------
+
+model ListingProposal {
+  id        String   @id @default(cuid())
+  productId String
+  kind      String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  decidedAt DateTime?
+}
+
+// ---------------------------------------------------------------------------
+// Bundle recommendations
+// ---------------------------------------------------------------------------
+
+model BundleRecommendation {
+  id                String   @id @default(cuid())
+  tenantId          String
+  name              String
+  description       String?
+  productIds        String[]
+  combinedPrice     Decimal  @db.Decimal(10, 2)
+  individualPrices  Json
+  marginEstimate    Decimal? @db.Decimal(10, 2)
+  status            String   @default("pending_approval")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Content briefs
+// ---------------------------------------------------------------------------
+
+model ContentBrief {
+  id                String   @id @default(cuid())
+  tenantId          String
+  title             String
+  objective         String
+  targetAudience    String
+  productId         String?
+  contentAngle      String
+  platform          String
+  format            String
+  cta               String
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Marketing calendar
+// ---------------------------------------------------------------------------
+
+model MarketingCalendar {
+  id                String   @id @default(cuid())
+  tenantId          String
+  name              String
+  description       String?
+  startDate         DateTime
+  endDate           DateTime
+  isRecurring       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CalendarEntry {
+  id                String   @id @default(cuid())
+  calendarId        String
+  title             String
+  productId         String?
+  scheduledAt       DateTime
+  status            String   @default("pending")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Campaigns
+// ---------------------------------------------------------------------------
+
+model Campaign {
+  id                String   @id @default(cuid())
+  tenantId          String
+  name              String
+  objective         String
+  targetAudience    String
+  productIds        String[]
+  startDate         DateTime
+  endDate           DateTime?
+  budget            Decimal? @db.Decimal(12, 2)
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CampaignGoal {
+  id          String   @id @default(cuid())
+  campaignId  String
+  name        String
+  metric      String
+  targetValue Decimal? @db.Decimal(12, 2)
+  currentValue Decimal? @db.Decimal(12, 2)
+  achieved    Boolean  @default(false)
+}
+
+// ---------------------------------------------------------------------------
+// Social accounts
+// ---------------------------------------------------------------------------
+
+model SocialAccount {
+  id               String   @id @default(cuid())
+  tenantId         String
+  platform         String
+  username         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SocialPost {
+  id               String   @id @default(cuid())
+  socialAccountId  String
+  content          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SocialMetric {
+  id               String   @id @default(cuid())
+  socialAccountId  String
+  metricName       String
+  metricValue      Decimal  @db.Decimal(10, 2)
+  periodStart      DateTime
+  periodEnd        DateTime
+  recordedAt       DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// SEO integration
+// ---------------------------------------------------------------------------
+
+model SEOConfiguration {
+  id               String   @id @default(cuid())
+  tenantId         String
+  openseoStatus    String   @default("not_connected")
+  openseoUrl       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum SEOStatus {
+  not_connected
+  connected
+  error
+}
+
+// ---------------------------------------------------------------------------
+// Competitor intelligence
+// ---------------------------------------------------------------------------
+
+model Competitor {
+  id               String   @id @default(cuid())
+  tenantId         String
+  name             String
+  website          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Growth recommendations
+// ---------------------------------------------------------------------------
+
+model GrowthRecommendation {
+  id                String   @id @default(cuid())
+  tenantId          String
+  type              String
+  title             String
+  description       String
+  priority          Decimal  @db.Decimal(5, 2)
+  confidence        Decimal  @db.Decimal(5, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+model Review {
+  id          String   @id @default(cuid())
+  productId String
+  rating      Int
+  createdAt   DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Bills and payments
+// ---------------------------------------------------------------------------
+
+model Bill {
+  id          String   @id @default(cuid())
+  supplierId String
+  amount      Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+}
+
+model SupplierPayment {
+  id        String   @id @default(cuid())
+  billId    String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Tenant settings
+// ---------------------------------------------------------------------------
+
+model TenantSettings {
+  id              String   @id @default(cuid())
+  tenantId        String
+  currencyCode    String   @default("KES")
+  taxRatePercent  Decimal  @default(0) @db.Decimal(5, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([tenantId])
+}

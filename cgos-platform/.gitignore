@@ -1,0 +1,25 @@
+﻿# Prisma / Database
+.prisma/
+node_modules/
+.env
+
+# Next.js
+.next/
+*.config.js
+
+# TypeScript
+*.tsbuildinfo
+target/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Production build
+/.next/standalone
+
+# Environment variables
+.env*.local

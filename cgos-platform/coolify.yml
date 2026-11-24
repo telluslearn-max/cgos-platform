@@ -1,0 +1,36 @@
+name: cgos-platform
+appId: null
+type: node
+tagline: Commerce Growth OS - AI-powered commerce intelligence platform
+description: Standalone web application + ChatGPT/MCP interface for commerce growth intelligence
+category: /tools
+image: node:22-alpine
+servicePort: 80
+env:
+  DATABASE_URL: "postgresql://postgres:postgres@db:5432/cgos"
+  NODE_ENV: "production"
+  # OpenSEO Integration
+  OPENSEO_DEPLOYED_URL: "https://seo.nuruelectronics.com"
+  OPENSEO_API_TOKEN: "${OPENSEO_API_TOKEN}"
+  OPENSEO_INTEGRATION_STATUS: "connected"
+  OPENSEO_SYNC_FREQUENCY: "daily"
+  # Prisma configuration
+  PRISMA_POSTGRES_URL: "postgresql://postgres:postgres@db:5432/cgos"
+  # URLs
+  NEXTAUTH_URL: "https://cgos.yourdomain.com"
+  NEXTAUTH_URL_INTERNAL: "http://localhost:3000"
+deployOnPush: false
+healthCheckPath: "/api/health"
+scale:
+  min: 1
+  max: 3
+resources:
+  cpu: 1.0
+  memory: 512Mi
+databases:
+  - name: cgos-db
+    type: postgresql
+    version: "15"
+envFiles: []
+variables: {}
+autoUpdateOnPush: false
