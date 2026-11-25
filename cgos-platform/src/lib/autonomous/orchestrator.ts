@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { runOpportunityScoring } from "@/lib/intelligence/scoring";
 import { generateBundleRecommendations } from "@/lib/intelligence/bundles";
 import { generateCreativeBriefs } from "@/lib/creative/briefs";
+import { crawlAndSyncFullNuruSitemap } from "@/lib/integrations/nuru/sitemapCrawler";
 
 export interface AutonomousCycleResult {
   cycleId: string;
@@ -30,7 +31,13 @@ export async function executeAutonomousGrowthCycle(
 
   if (!tenant) throw new Error(`Tenant '${tenantSlug}' not found.`);
 
-  // 1. Data Ingestion Verification
+  // 1. Continuous Catalogue Ingestion: Crawl and auto-sync any new products from NURU sitemap
+  try {
+    await crawlAndSyncFullNuruSitemap();
+  } catch (err) {
+    console.warn("Live sitemap ingestion warning, continuing with existing catalogue:", err);
+  }
+
   const productCount = await prisma.product.count({
     where: { tenantId: tenant.id },
   });

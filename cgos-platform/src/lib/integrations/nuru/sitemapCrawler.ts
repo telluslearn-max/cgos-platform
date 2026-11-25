@@ -104,7 +104,9 @@ export async function crawlAndSyncFullNuruSitemap(): Promise<{ totalIndexed: num
 
   const xml = await response.text();
   const matches = Array.from(xml.matchAll(/<loc>https:\/\/www\.nuruelectronics\.com\/products\/([^<]+)<\/loc>/g));
-  const productSlugs = matches.map((m) => m[1]);
+  const productSlugs = matches
+    .map((m) => m[1])
+    .filter((slug): slug is string => Boolean(slug) && slug.trim().length > 0);
 
   let newlyAdded = 0;
   let updated = 0;
