@@ -11,11 +11,13 @@ export const metadata = {
 export default async function SettingsPage() {
   const tenant = await prisma.tenant.findUnique({
     where: { slug: "nuru-electronics" },
-    include: {
-      subscriptions: true,
-      settings: true,
-    },
   });
+
+  const subscription = tenant
+    ? await prisma.tenantSubscription.findFirst({
+        where: { tenantId: tenant.id },
+      })
+    : null;
 
   const recentCycles = tenant
     ? await prisma.growthRecommendation.findMany({
@@ -140,7 +142,7 @@ export default async function SettingsPage() {
               </div>
               <div className="flex justify-between border-b border-slate-800 pb-2">
                 <span className="text-slate-400">Subscription Tier</span>
-                <span className="text-white font-semibold capitalize">{tenant?.subscriptions?.[0]?.tier || "Enterprise"}</span>
+                <span className="text-white font-semibold capitalize">{subscription?.plan || "Enterprise"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Safeguards Policy</span>

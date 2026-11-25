@@ -39,7 +39,7 @@ export async function executeAutonomousGrowthCycle(
   const scoredProducts = await runOpportunityScoring(tenantSlug);
 
   // 3. Intelligence: Bundle Discovery Engine
-  const discoveredBundles = await runBundleDiscovery(tenantSlug);
+  const discoveredBundles = await generateBundleRecommendations(tenantSlug);
 
   // 4. Creative Intelligence: Brief generation for highest opportunity products
   let briefsCreated = 0;
@@ -47,27 +47,24 @@ export async function executeAutonomousGrowthCycle(
     const topScored = scoredProducts.slice(0, 2);
     for (const prod of topScored) {
       const existing = await prisma.contentBrief.findFirst({
-        where: { tenantId: tenant.id, productId: prod.id },
+        where: { tenantId: tenant.id, productId: prod.productId },
       });
       if (!existing) {
-        const generated = generateCreativeBriefs(prod);
-        if (generated.length > 0) {
-          await prisma.contentBrief.create({
-            data: {
-              tenantId: tenant.id,
-              title: generated[0].title,
-              objective: generated[0].objective,
-              targetAudience: generated[0].targetAudience,
-              productId: prod.id,
-              contentAngle: generated[0].contentAngle,
-              platform: generated[0].platform,
-              format: generated[0].format,
-              cta: generated[0].cta,
-              status: "draft",
-            },
-          });
-          briefsCreated++;
-        }
+        await prisma.contentBrief.create({
+          data: {
+            tenantId: tenant.id,
+            title: `${prod.title} — Autonomous Growth Spotlight`,
+            objective: `Drive commercial demand for high-opportunity product with ${prod.grossMarginPercent}% margin`,
+            targetAudience: "Solar & electronics consumers in Kenya",
+            productId: prod.productId,
+            contentAngle: `Highlight reliability, competitive price point, and warranty coverage`,
+            platform: "WhatsApp",
+            format: "Catalog Card",
+            cta: "Order via WhatsApp or visit NURU Electronics store",
+            status: "draft",
+          },
+        });
+        briefsCreated++;
       }
     }
   }
@@ -83,21 +80,23 @@ export async function executeAutonomousGrowthCycle(
     nextDate.setDate(nextDate.getDate() + 3);
 
     const targetProd = scoredProducts[0];
-    const existingEntry = await prisma.calendarEntry.findFirst({
-      where: { calendarId: calendar.id, productId: targetProd.id },
-    });
-
-    if (!existingEntry) {
-      await prisma.calendarEntry.create({
-        data: {
-          calendarId: calendar.id,
-          title: `Autonomous Showcase: ${targetProd.title}`,
-          productId: targetProd.id,
-          scheduledAt: nextDate,
-          status: "scheduled",
-        },
+    if (targetProd) {
+      const existingEntry = await prisma.calendarEntry.findFirst({
+        where: { calendarId: calendar.id, productId: targetProd.productId },
       });
-      dropsScheduled++;
+
+      if (!existingEntry) {
+        await prisma.calendarEntry.create({
+          data: {
+            calendarId: calendar.id,
+            title: `Autonomous Showcase: ${targetProd.title}`,
+            productId: targetProd.productId,
+            scheduledAt: nextDate,
+            status: "scheduled",
+          },
+        });
+        dropsScheduled++;
+      }
     }
   }
 

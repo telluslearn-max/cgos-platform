@@ -10,15 +10,17 @@ export interface CreativeBriefTemplate {
   cta: string;
 }
 
-export const BRAND_MEMORY_NURU = {
-  name: "NURU Electronics",
-  tagline: "Authentic Tech, Guaranteed Reliability",
-  tone: "Modern, knowledgeable, trustworthy, clear, and tech-forward",
-  guarantees: [
-    "100% Genuine East Africa stock with manufacturer warranty",
-    "Same-day Nairobi delivery and countrywide secure parcel dispatch",
-    "Flexible Lipa Mdogo Mdogo (BNPL) financing options available",
-  ],
+export const BRAND_MEMORY_PROFILES = {
+  nuruElectronics: {
+    brandName: "NURU Electronics",
+    tone: "Authoritative, customer-first, transparent, tech-savvy yet accessible",
+    corePillars: [
+      "100% Genuine, tested tech and electronics with warranty",
+      "Fast, reliable nationwide delivery across Kenya",
+      "Competitive prices with transparent import specifications",
+      "Flexible Lipa Mdogo Mdogo (BNPL) financing options available",
+    ],
+  },
 };
 
 /**
@@ -34,9 +36,6 @@ export async function generateCreativeBriefs(tenantSlug = "nuru-electronics") {
   // Fetch top hero products from catalogue
   const heroProducts = await prisma.product.findMany({
     where: { tenantId: tenant.id },
-    include: {
-      variants: true,
-    },
     take: 4,
   });
 
@@ -48,47 +47,38 @@ export async function generateCreativeBriefs(tenantSlug = "nuru-electronics") {
         title: `${product.title} — Flagship Instagram Showcase`,
         objective: "Drive direct DM enquiries and storefront visits highlighting flagship specs and verified warranty.",
         targetAudience: "Tech enthusiasts and creators seeking authentic, warranty-backed devices in Kenya.",
-        contentAngle: `Focus on genuine flagship performance with transparent KES pricing. Highlight ${BRAND_MEMORY_NURU.guarantees[0]}.`,
+        contentAngle: "Premium unboxing, durability test, and speed overview under realistic Kenyan power/connectivity conditions.",
         platform: "Instagram",
-        format: "Carousel & Reels",
-        cta: "Send DM or tap link in bio to order with same-day Nairobi delivery.",
+        format: "Reel / Carousel",
+        cta: "Tap link in bio to order with same-day Nairobi delivery or DM for wholesale rates.",
       },
       {
-        title: `${product.title} — WhatsApp VIP Broadcast`,
-        objective: "Convert existing VIP customer list into high-ticket sales with limited stock availability announcement.",
-        targetAudience: "Repeat NURU electronics shoppers and corporate executive buyers.",
-        contentAngle: `Exclusive stock update: Limited units available in Nairobi. Flexible Lipa Mdogo Mdogo financing available.`,
+        title: `${product.title} — WhatsApp Catalog Flash Drop`,
+        objective: "Immediate conversational checkout and repeat order velocity from high-intent VIP buyers.",
+        targetAudience: "Repeat retail clients and regional electronics resellers.",
+        contentAngle: "Exclusive limited-time price lock and guaranteed genuine serial check guarantee.",
         platform: "WhatsApp",
-        format: "Direct Catalog Broadcast",
-        cta: "Reply 'ORDER' to reserve your unit immediately.",
+        format: "Catalog Message & Broadcast Card",
+        cta: "Reply 'ORDER NOW' to reserve yours before stock runs out.",
       },
     ];
 
-    for (const tmpl of templates) {
-      const existing = await prisma.contentBrief.findFirst({
-        where: {
+    for (const t of templates) {
+      const brief = await prisma.contentBrief.create({
+        data: {
           tenantId: tenant.id,
-          title: tmpl.title,
+          title: t.title,
+          objective: t.objective,
+          targetAudience: t.targetAudience,
+          productId: product.id,
+          contentAngle: t.contentAngle,
+          platform: t.platform,
+          format: t.format,
+          cta: t.cta,
+          status: "draft",
         },
       });
-
-      if (!existing) {
-        const brief = await prisma.contentBrief.create({
-          data: {
-            tenantId: tenant.id,
-            productId: product.id,
-            title: tmpl.title,
-            objective: tmpl.objective,
-            targetAudience: tmpl.targetAudience,
-            contentAngle: tmpl.contentAngle,
-            platform: tmpl.platform,
-            format: tmpl.format,
-            cta: tmpl.cta,
-            status: "ready_for_review",
-          },
-        });
-        createdBriefs.push(brief);
-      }
+      createdBriefs.push(brief);
     }
   }
 

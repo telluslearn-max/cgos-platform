@@ -19,18 +19,20 @@ export interface TenantContext {
 export async function resolveTenant(slug = "nuru-electronics"): Promise<TenantContext | null> {
   const tenant = await prisma.tenant.findUnique({
     where: { slug },
-    include: {
-      subscriptions: true,
-      _count: {
-        select: { products: true },
-      },
-    },
   });
 
   if (!tenant) return null;
 
-  const sub = tenant.subscriptions[0];
-  const tier = sub?.tier || "enterprise";
+  const [sub, productCount] = await Promise.all([
+    prisma.tenantSubscription.findFirst({
+      where: { tenantId: tenant.id },
+    }),
+    prisma.product.count({
+      where: { tenantId: tenant.id },
+    }),
+  ]);
+
+  const tier = sub?.plan || "enterprise";
 
   return {
     id: tenant.id,
@@ -39,7 +41,7 @@ export async function resolveTenant(slug = "nuru-electronics"): Promise<TenantCo
     tier,
     isActive: sub?.status === "active" || true,
     maxProducts: tier === "enterprise" ? 10000 : 500,
-    currentProductCount: tenant._count.products,
+    currentProductCount: productCount,
     features: {
       bundleEngine: true,
       creativeStudio: true,
@@ -65,7 +67,7 @@ export async function getTenantAnalytics(slug = "nuru-electronics") {
 
   const totalCatalogValue = products.reduce((acc, p) => acc + Number(p.sellingPrice) * (p.stockQuantity || 1), 0);
   const totalCampaignBudget = campaigns.reduce((acc, c) => acc + (c.budget ? Number(c.budget) : 0), 0);
-  const potentialIncrementalRevenue = bundles.reduce((acc, b) => acc + Number(b.projectedRevenue || 0), 0);
+  const potentialIncrementalRevenue = bundles.reduce((acc, b) => acc + Number(b.combinedPrice || 0), 0);
 
   return {
     tenantName: tenant.name,
