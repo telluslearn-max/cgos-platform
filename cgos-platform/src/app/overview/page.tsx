@@ -1,104 +1,212 @@
-/** @type {import('next').Metadata} */
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+
 export const metadata = {
   title: "CGOS Dashboard - Commerce Growth OS",
   description: "Commerce Growth OS - AI-powered commerce intelligence and marketing execution platform",
 };
 
-import Link from "next/link";
+export const dynamic = "force-dynamic";
 
-export default function OverviewPage() {
+async function getOverviewData() {
+  try {
+    const tenant = await prisma.tenant.findFirst({
+      where: { slug: "nuru-electronics" },
+    });
+
+    const tenantId = tenant?.id;
+
+    const [totalProducts, activeVariants, activeCampaigns, contentBriefs, growthRecommendations] =
+      await Promise.all([
+        tenantId ? prisma.product.count({ where: { tenantId } }) : prisma.product.count(),
+        prisma.productVariant.count(),
+        prisma.campaign.count({ where: { status: "active" } }),
+        prisma.contentBrief.count(),
+        prisma.productAnalysis.count(),
+      ]);
+
+    const topOpportunities = await prisma.productAnalysis.findMany({
+      take: 4,
+      orderBy: { opportunityScore: "desc" },
+    });
+
+    return {
+      tenantName: tenant?.name || "NURU Electronics (Pilot)",
+      tenantLocation: tenant?.location || "Nairobi, Kenya",
+      metrics: {
+        totalProducts,
+        activeVariants,
+        activeCampaigns,
+        contentBriefs,
+        growthRecommendations,
+      },
+      topOpportunities,
+      isLiveDb: true,
+    };
+  } catch (err) {
+    console.error("Overview data fetch error:", err);
+    return {
+      tenantName: "NURU Electronics (Pilot)",
+      tenantLocation: "Nairobi, Kenya",
+      metrics: {
+        totalProducts: 0,
+        activeVariants: 0,
+        activeCampaigns: 0,
+        contentBriefs: 0,
+        growthRecommendations: 0,
+      },
+      topOpportunities: [],
+      isLiveDb: false,
+    };
+  }
+}
+
+export default async function OverviewPage() {
+  const data = await getOverviewData();
+
   return (
     <div className="min-h-screen bg-gray-50 antialiased">
+      {/* Top Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-md bg-kesh-green flex items-center justify-center">
+              <div className="h-10 w-10 rounded-md bg-emerald-600 flex items-center justify-center">
                 <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2h2a2 2 0 002-2V5a2 2 0 00-2-2H11a2 2 0 00-2 2v6m12 4h-2m0 0h-2m2 0a2 2 0 100-4h2a2 2 0 100 4zm-2-6a2 2 0 11-4 0 2 2 0 014 0zM5 7a2 2 0 11-4 0 2 2 0 014 0zM3 15a2 2 0 11-2-2H1a2 2 0 112-2h12a2 2 0 112 2h-1M9 10v10m-7 0V5m7 0v5-3.5 3.5M15.5 15.5l3.5 3.5m1.4-1.4l-3.5-3.5M5 15a2 2 0 11-4 0 2 2 0 014 0z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-kesh-dark">CGOS Platform</h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Commerce Growth OS</h2>
+                <p className="text-xs text-gray-500">{data.tenantName} &bull; {data.tenantLocation}</p>
+              </div>
             </div>
-            <div className="hidden md:flex items-center gap-2">
-              <span className="text-sm text-gray-600">Welcome, Admin</span>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/catalogue"
+                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-md border border-emerald-200"
+              >
+                View Catalogue
+              </Link>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Phase 1 Active
+              </span>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Business Metrics Cards */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Catalogue Intelligence</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Total Products</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Active Variants</p>
-              </div>
-            </div>
+      <main className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Module Shortcuts Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+          {[
+            { name: "Overview", href: "/overview", active: true },
+            { name: "Catalogue", href: "/catalogue", active: false },
+            { name: "Intelligence", href: "/intelligence", active: false },
+            { name: "Bundles", href: "/bundles", active: false },
+            { name: "Content Studio", href: "/content-studio", active: false },
+            { name: "Settings", href: "/settings", active: false },
+          ].map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`text-center py-2 px-3 rounded-lg text-xs font-medium transition ${
+                item.active
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-white text-gray-700 border hover:bg-gray-50"
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
+
+        {/* Business Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Products</h3>
+            <p className="text-3xl font-extrabold text-emerald-600">{data.metrics.totalProducts}</p>
+            <p className="text-xs text-gray-400 mt-1">Live in catalogue</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Marketing Health</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Active Campaigns</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Content Briefs</p>
-              </div>
-            </div>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Variants</h3>
+            <p className="text-3xl font-extrabold text-emerald-600">{data.metrics.activeVariants}</p>
+            <p className="text-xs text-gray-400 mt-1">SKUs tracked in inventory</p>
           </div>
 
-          {/* SEO Cards */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">SEO Intelligence</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Tracked Keywords</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Ranking Products</p>
-              </div>
-            </div>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Campaigns</h3>
+            <p className="text-3xl font-extrabold text-emerald-600">{data.metrics.activeCampaigns}</p>
+            <p className="text-xs text-gray-400 mt-1">Growth & promotional tracks</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Growth Opportunities</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Bundle Recommendations</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-kesh-green">0</p>
-                <p className="text-sm text-gray-500">Growth Recommendations</p>
-              </div>
-            </div>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Opportunity Analyses</h3>
+            <p className="text-3xl font-extrabold text-emerald-600">{data.metrics.growthRecommendations}</p>
+            <p className="text-xs text-gray-400 mt-1">Assessed for marketing ROI</p>
           </div>
         </div>
 
-        {/* Action Centre */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6 border">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Action Centre</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            No pending actions. All systems operational.
-          </p>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>✅ OpenSEO integration: Connected</li>
-            <li>✅ Database: Connected</li>
-            <li>✅ Catalogue: Loaded</li>
-          </ul>
+        {/* Growth Intelligence Highlights & Action Centre */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Top Growth Opportunities</h3>
+              <Link href="/intelligence" className="text-xs text-emerald-600 font-semibold hover:underline">
+                View all &rarr;
+              </Link>
+            </div>
+            {data.topOpportunities.length > 0 ? (
+              <div className="space-y-3">
+                {data.topOpportunities.map((opp, idx) => (
+                  <div
+                    key={opp.id || idx}
+                    className="flex items-center justify-between p-3.5 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition"
+                  >
+                    <div>
+                      <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 text-blue-800 mr-2">
+                        {opp.lifecycleCategory.replace("_", " ").toUpperCase()}
+                      </span>
+                      <span className="text-xs text-gray-600 font-medium">Status: {opp.marketingStatus}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-emerald-600">
+                        Score: {Number(opp.opportunityScore).toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 py-4">
+                Run <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-800">npm run seed</code> to populate initial opportunity scoring for NURU Electronics.
+              </p>
+            )}
+          </div>
+
+          {/* Action Centre */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">System Status</h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span>Database: <strong>{data.isLiveDb ? "Connected" : "Standby"}</strong></span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span>Tenant: <strong>NURU Electronics</strong></span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span>OpenSEO: <strong>Configured</strong></span>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span>Coolify Deploy: <strong>Ready</strong></span>
+              </li>
+            </ul>
+          </div>
         </div>
       </main>
     </div>
