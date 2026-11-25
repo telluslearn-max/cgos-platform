@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { runOpportunityScoring } from "@/lib/intelligence/scoring";
-import { runBundleDiscovery } from "@/lib/intelligence/bundles";
+import { generateBundleRecommendations } from "@/lib/intelligence/bundles";
 import { generateCreativeBriefs } from "@/lib/creative/briefs";
 
 export interface AutonomousCycleResult {

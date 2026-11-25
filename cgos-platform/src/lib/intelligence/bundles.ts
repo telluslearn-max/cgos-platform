@@ -48,6 +48,10 @@ export const KNOWN_BUNDLE_TEMPLATES: BundleCandidate[] = [
  * Discovers and generates bundle recommendations based on product catalogue state and affinities
  */
 export async function generateBundleRecommendations(tenantSlug = "nuru-electronics") {
+  return runBundleDiscovery(tenantSlug);
+}
+
+export async function runBundleDiscovery(tenantSlug = "nuru-electronics") {
   const tenant = await prisma.tenant.findUnique({
     where: { slug: tenantSlug },
   });
