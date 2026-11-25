@@ -275,6 +275,73 @@ async function main() {
     console.log(`✓ Product seeded: ${product.title} (SKU: ${product.sku})`);
   }
 
+  // 5. Seed Initial Bundle Recommendations (PRD §6)
+  const iphone = await prisma.product.findUnique({ where: { handle: "apple-iphone-15-pro-128gb" } });
+  const anker = await prisma.product.findUnique({ where: { handle: "anker-737-power-bank-powercore-24k" } });
+  const samsung = await prisma.product.findUnique({ where: { handle: "samsung-galaxy-s24-ultra-256gb" } });
+  const sony = await prisma.product.findUnique({ where: { handle: "sony-wh-1000xm5-wireless-headphones" } });
+  const macbook = await prisma.product.findUnique({ where: { handle: "macbook-air-13-inch-m3-16gb-512gb" } });
+
+  if (iphone && anker) {
+    const combinedPrice = Number(iphone.sellingPrice) + Number(anker.sellingPrice);
+    await prisma.bundleRecommendation.upsert({
+      where: { id: "bundle-creator-pack" },
+      update: {},
+      create: {
+        id: "bundle-creator-pack",
+        tenantId: tenant.id,
+        name: "Mobile Creator Power Pack",
+        description: "Apple iPhone 15 Pro paired with Anker 737 24K Power Bank for uninterrupted 4K video capture and fast field charging.",
+        productIds: [iphone.id, anker.id],
+        combinedPrice,
+        individualPrices: { [iphone.id]: Number(iphone.sellingPrice), [anker.id]: Number(anker.sellingPrice) },
+        marginEstimate: 21.5,
+        status: "pending_approval",
+      },
+    });
+    console.log("✓ Bundle seeded: Mobile Creator Power Pack");
+  }
+
+  if (samsung && sony) {
+    const combinedPrice = Number(samsung.sellingPrice) + Number(sony.sellingPrice);
+    await prisma.bundleRecommendation.upsert({
+      where: { id: "bundle-audiophile-suite" },
+      update: {},
+      create: {
+        id: "bundle-audiophile-suite",
+        tenantId: tenant.id,
+        name: "Executive Audiophile Suite",
+        description: "Samsung Galaxy S24 Ultra combined with Sony WH-1000XM5 Wireless Noise Cancelling Headphones for hybrid executive focus.",
+        productIds: [samsung.id, sony.id],
+        combinedPrice,
+        individualPrices: { [samsung.id]: Number(samsung.sellingPrice), [sony.id]: Number(sony.sellingPrice) },
+        marginEstimate: 23.8,
+        status: "approved",
+      },
+    });
+    console.log("✓ Bundle seeded: Executive Audiophile Suite");
+  }
+
+  if (macbook && sony) {
+    const combinedPrice = Number(macbook.sellingPrice) + Number(sony.sellingPrice);
+    await prisma.bundleRecommendation.upsert({
+      where: { id: "bundle-remote-workstation" },
+      update: {},
+      create: {
+        id: "bundle-remote-workstation",
+        tenantId: tenant.id,
+        name: "Remote Pro Workstation",
+        description: "Apple MacBook Air 13-inch M3 paired with Sony WH-1000XM5 Noise Cancelling Headphones for deep focus coding and design.",
+        productIds: [macbook.id, sony.id],
+        combinedPrice,
+        individualPrices: { [macbook.id]: Number(macbook.sellingPrice), [sony.id]: Number(sony.sellingPrice) },
+        marginEstimate: 24.2,
+        status: "pending_approval",
+      },
+    });
+    console.log("✓ Bundle seeded: Remote Pro Workstation");
+  }
+
   console.log("Seeding completed successfully!");
 }
 

@@ -114,5 +114,6 @@ On startup the container runs `prisma db push --skip-generate` before starting t
 - [`docs/PRD.md`](docs/PRD.md): Product Requirements Document v1.0
 - [`docs/PHASE1_DATA_LAYER.md`](docs/PHASE1_DATA_LAYER.md): Phase 1 Data Layer, Seeding & API Documentation
 - [`docs/NURU_INTEGRATION_ADAPTER.md`](docs/NURU_INTEGRATION_ADAPTER.md): NURU Commerce Integration Adapter (PRD §14)
+- [`docs/BUNDLE_DISCOVERY_ENGINE.md`](docs/BUNDLE_DISCOVERY_ENGINE.md): Bundle & Cross-Sell Discovery Engine (PRD §6)
 - [`CGOS_SETUP_SUMMARY.md`](CGOS_SETUP_SUMMARY.md): platform overview, data model and roadmap
 - [`cgos-platform/OPENSEO_INTEGRATION_GUIDE.md`](cgos-platform/OPENSEO_INTEGRATION_GUIDE.md): OpenSEO integration
