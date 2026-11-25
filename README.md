@@ -84,6 +84,7 @@ cd cgos-platform
 npm ci
 export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cgos"
 npx prisma db push   # create the tables
+npm run seed         # seed initial pilot tenant (NURU Electronics) & catalogue
 npm run dev          # http://localhost:3000
 ```
 
@@ -111,5 +112,6 @@ On startup the container runs `prisma db push --skip-generate` before starting t
 ## Further reading
 
 - [`docs/PRD.md`](docs/PRD.md): Product Requirements Document v1.0
+- [`docs/PHASE1_DATA_LAYER.md`](docs/PHASE1_DATA_LAYER.md): Phase 1 Data Layer, Seeding & API Documentation
 - [`CGOS_SETUP_SUMMARY.md`](CGOS_SETUP_SUMMARY.md): platform overview, data model and roadmap
 - [`cgos-platform/OPENSEO_INTEGRATION_GUIDE.md`](cgos-platform/OPENSEO_INTEGRATION_GUIDE.md): OpenSEO integration
