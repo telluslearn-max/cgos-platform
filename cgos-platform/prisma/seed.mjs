@@ -342,6 +342,111 @@ async function main() {
     console.log("✓ Bundle seeded: Remote Pro Workstation");
   }
 
+  // 6. Seed Content Briefs (PRD §7 - Phase 3)
+  if (iphone) {
+    await prisma.contentBrief.upsert({
+      where: { id: "brief-iphone-ig" },
+      update: {},
+      create: {
+        id: "brief-iphone-ig",
+        tenantId: tenant.id,
+        productId: iphone.id,
+        title: "Apple iPhone 15 Pro — Instagram Showcase",
+        objective: "Drive direct DM enquiries with genuine warranty guarantee",
+        targetAudience: "Tech creators and professionals in Nairobi",
+        contentAngle: "Genuine Apple Titanium design with verified local warranty and same-day delivery",
+        platform: "Instagram",
+        format: "Carousel & Reels",
+        cta: "Send DM or visit our Nairobi store to order",
+        status: "ready_for_review",
+      },
+    });
+    console.log("✓ Content Brief seeded: Apple iPhone 15 Pro Showcase");
+  }
+
+  // 7. Seed Marketing Calendar & Campaigns (PRD §8 - Phase 4)
+  const calendar = await prisma.marketingCalendar.upsert({
+    where: { id: "cal-nuru-main" },
+    update: {},
+    create: {
+      id: "cal-nuru-main",
+      tenantId: tenant.id,
+      name: "NURU Q4 Commercial Growth Calendar",
+      description: "Unified cross-platform marketing schedule for holiday season",
+      startDate: new Date("2026-11-01"),
+      endDate: new Date("2026-12-31"),
+      isRecurring: true,
+    },
+  });
+
+  if (iphone && samsung && sony) {
+    await prisma.campaign.upsert({
+      where: { id: "camp-flagship-q4" },
+      update: {},
+      create: {
+        id: "camp-flagship-q4",
+        tenantId: tenant.id,
+        name: "Q4 Flagship Tech Showcase",
+        objective: "Accelerate high-margin flagship smartphone and audio revenue",
+        targetAudience: "Premium device shoppers in East Africa",
+        productIds: [iphone.id, samsung.id, sony.id],
+        startDate: new Date("2026-11-15"),
+        endDate: new Date("2026-12-24"),
+        budget: 150000.00,
+        status: "active",
+      },
+    });
+
+    await prisma.calendarEntry.upsert({
+      where: { id: "entry-ig-1" },
+      update: {},
+      create: {
+        id: "entry-ig-1",
+        calendarId: calendar.id,
+        title: "Instagram Carousel: iPhone 15 Pro Feature Spotlight",
+        productId: iphone.id,
+        scheduledAt: new Date("2026-11-28T10:00:00Z"),
+        status: "scheduled",
+      },
+    });
+    console.log("✓ Campaign and Calendar Entry seeded: Q4 Flagship Tech Showcase");
+  }
+
+  // 8. Seed SEO & Competitor Tracking (PRD §9, §10 - Phase 5)
+  await prisma.sEOConfiguration.upsert({
+    where: { id: "seo-config-nuru" },
+    update: {},
+    create: {
+      id: "seo-config-nuru",
+      tenantId: tenant.id,
+      openseoStatus: "connected",
+      openseoUrl: "https://seo.nuruelectronics.com",
+    },
+  });
+
+  await prisma.competitor.upsert({
+    where: { id: "comp-jumia" },
+    update: {},
+    create: {
+      id: "comp-jumia",
+      tenantId: tenant.id,
+      name: "Jumia Kenya Tech",
+      website: "https://www.jumia.co.ke",
+    },
+  });
+
+  await prisma.competitor.upsert({
+    where: { id: "comp-phoneplace" },
+    update: {},
+    create: {
+      id: "comp-phoneplace",
+      tenantId: tenant.id,
+      name: "Phoneplace Kenya",
+      website: "https://phoneplacekenya.com",
+    },
+  });
+  console.log("✓ SEO configuration and Competitors seeded");
+
   console.log("Seeding completed successfully!");
 }
 
