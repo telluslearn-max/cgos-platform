@@ -24,7 +24,7 @@ export default function MarketingCalendarPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Calendar View -->
+          {/* Calendar View */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Monthly Calendar</h3>
             <p className="text-sm text-gray-500">
@@ -39,7 +39,7 @@ export default function MarketingCalendarPage() {
             </p>
           </div>
 
-          <!-- Campaign Schedule -->
+          {/* Campaign Schedule */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Schedule</h3>
             <p className="text-sm text-gray-500">
@@ -55,7 +55,7 @@ export default function MarketingCalendarPage() {
           </div>
         </div>
 
-        <!-- Campaign Calendar -->
+        {/* Campaign Calendar */}
         <div className="mt-6 h-[500px] bg-white rounded-lg shadow overflow-hidden">
           <div className="h-full p-6">
             <p className="text-sm text-gray-500 text-center">

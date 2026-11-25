@@ -24,7 +24,7 @@ export default function SEOPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- OpenSEO Integration Status -->
+          {/* OpenSEO Integration Status */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">OpenSEO Integration</h3>
             <div className="flex items-start gap-3">
@@ -39,7 +39,7 @@ export default function SEOPage() {
             </p>
           </div>
 
-          <!-- Tracked Keywords -->
+          {/* Tracked Keywords */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Tracked Keywords</h3>
             <p className="text-sm text-gray-500">
@@ -47,7 +47,7 @@ export default function SEOPage() {
             </p>
           </div>
 
-          <!-- Keyword Opportunities -->
+          {/* Keyword Opportunities */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Keyword Opportunities</h3>
             <p className="text-sm text-gray-500">
@@ -63,7 +63,7 @@ export default function SEOPage() {
           </div>
         </div>
 
-        <!-- SEO Metrics -->
+        {/* SEO Metrics */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Domain Authority</h4>
@@ -82,7 +82,7 @@ export default function SEOPage() {
           </div>
         </div>
 
-        <!-- SEO Recommendations -->
+        {/* SEO Recommendations */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">SEO Recommendations</h3>
           <ul className="list-disc pl-5 text-gray-600 text-sm">

@@ -29,7 +29,7 @@ export default function OverviewPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Business Metrics Cards -->
+          {/* Business Metrics Cards */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Catalogue Intelligence</h3>
             <div className="space-y-4">
@@ -58,7 +58,7 @@ export default function OverviewPage() {
             </div>
           </div>
 
-          <!-- SEO Cards -->
+          {/* SEO Cards */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">SEO Intelligence</h3>
             <div className="space-y-4">
@@ -88,7 +88,7 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        <!-- Action Centre -->
+        {/* Action Centre */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Action Centre</h3>
           <p className="text-sm text-gray-500 mb-4">

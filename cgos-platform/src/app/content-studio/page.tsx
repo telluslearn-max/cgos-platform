@@ -24,7 +24,7 @@ export default function ContentStudioPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Content Briefs -->
+          {/* Content Briefs */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Active Content Briefs</h3>
             <p className="text-sm text-gray-500">
@@ -39,7 +39,7 @@ export default function ContentStudioPage() {
             </p>
           </div>
 
-          <!-- Content Quality -->
+          {/* Content Quality */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Quality Score</h3>
             <p className="text-sm text-gray-500">
@@ -55,7 +55,7 @@ export default function ContentStudioPage() {
           </div>
         </div>
 
-        <!-- Brief Management -->
+        {/* Brief Management */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Next Brief</h4>

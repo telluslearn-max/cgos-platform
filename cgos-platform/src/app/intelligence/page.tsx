@@ -24,7 +24,7 @@ export default function IntelligencePage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Growth Opportunities -->
+          {/* Growth Opportunities */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Product Opportunities</h3>
             <p className="text-sm text-gray-500">
@@ -39,7 +39,7 @@ export default function IntelligencePage() {
             </p>
           </div>
 
-          <!-- AI Learning -->
+          {/* AI Learning */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Learning Engine</h3>
             <p className="text-sm text-gray-500">
@@ -55,7 +55,7 @@ export default function IntelligencePage() {
           </div>
         </div>
 
-        <!-- Insights Section -->
+        {/* Insights Section */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Top Opportunity</h4>
