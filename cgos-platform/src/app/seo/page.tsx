@@ -1,102 +1,119 @@
-/** @type {import('next').Metadata} */
+import Link from "next/link";
+import { getSEOIntelligence } from "@/lib/market/intelligence";
+
+export const dynamic = "force-dynamic";
+
 export const metadata = {
-  title: "CGOS SEO - OpenSEO Intelligence",
-  description: "Commerce Growth OS - SEO intelligence and OpenSEO integration",
+  title: "SEO Intelligence | CGOS",
+  description: "Search rankings, keyword opportunities, and crawl health for NURU Electronics",
 };
 
-export default function SEOPage() {
+export default async function SEOPage() {
+  const seo = await getSEOIntelligence("nuru-electronics");
+
   return (
-    <div className="min-h-screen bg-gray-50 antialiased">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-green-600 flex items-center justify-center">
-                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253a4 4 0 110-7.998m0 7.998l3.87 3m-3.87-3v12l-3.87-3M5.25 3h13.5A2.75 2.75 0 0121.25 5.75v12.5c0 .767-.225 1.476-.66 2.093l-2.057-1.07a2.752 2.752 0 01-1.298-.605L17.51 18.07a2.75 2.75 0 00.53 1.065h1.5a2.75 2.75 0 012.75 2.75v1.5c0 .613.25 1.165.705 1.615l2.266 1.11a.75.75 0 001.088-.413l2.633-2.057a.75.75 0 00-.413-1.088L15.416 14.03a2.75 2.75 0 00-.605-1.298L11.5 5.385a2.752 2.752 0 01.065-.53H5.75c-.926 0-1.691.433-2.167 1.082m0-18C4.6 1.66 3 3.368 3 5.25v12.5c0 .507.127 .958.37 1.35l2.078 1.055c.318.16.652.253 1.014.235.363-.018.695-.12 1.014-.305v-12.5c0-1.887 1.523-3.418 3.405-3.153zM9.75 15H5.25v-2.25c0-.388.158-.61.477-.73l2.067-1.055a.75.75 0 011.105 0l2.067 1.055c.318.16.477.382.477.73V15z"/>
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-kesh-dark">SEO Intelligence</h2>
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Navigation & Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Link href="/overview" className="text-xs uppercase tracking-wider text-emerald-400 font-semibold hover:underline">
+                Overview
+              </Link>
+              <span className="text-slate-600">/</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400">Phase 5 Market Intelligence</span>
             </div>
+            <h1 className="text-3xl font-bold tracking-tight text-white">Search Engine Optimization (OpenSEO)</h1>
+            <p className="text-sm text-slate-400 mt-1">
+              SERP rankings, search visibility, and organic keyword discovery
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/competitors"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-lg border border-slate-700 transition"
+            >
+              Competitor Benchmark
+            </Link>
+            <Link
+              href="/content-studio"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-emerald-950/50"
+            >
+              Generate SEO Briefs
+            </Link>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* OpenSEO Integration Status */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">OpenSEO Integration</h3>
-            <div className="flex items-start gap-3">
-              <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0 mt-1"></div>
-              <div>
-                <p className="font-medium">Connected</p>
-                <p className="text-xs text-gray-500">NURU Electronics OpenSEO instance</p>
-              </div>
+        {/* Status Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">OpenSEO Crawler</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-2xl font-bold text-emerald-400 capitalize">{seo.status}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Sync frequency: daily | Last sync: Pending
-            </p>
+            <p className="text-xs text-slate-400 mt-2 truncate">{seo.openseoUrl || "Managed Agent"}</p>
           </div>
-
-          {/* Tracked Keywords */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Tracked Keywords</h3>
-            <p className="text-sm text-gray-500">
-                Keyword data syncing...
-            </p>
+          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Crawl Health Score</span>
+            <div className="text-2xl font-bold text-white mt-1">{seo.crawlHealthScore}%</div>
+            <p className="text-xs text-emerald-400 mt-2">Optimal site architecture</p>
           </div>
-
-          {/* Keyword Opportunities */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Keyword Opportunities</h3>
-            <p className="text-sm text-gray-500">
-                Opportunities identifying...
-            </p>
+          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Tracked Target Keywords</span>
+            <div className="text-2xl font-bold text-white mt-1">{seo.trackedKeywords.length}</div>
+            <p className="text-xs text-slate-400 mt-2">High commercial intent</p>
           </div>
-
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Ranking Tracker</h3>
-            <p className="text-sm text-gray-500">
-                Ranking data loading...
-            </p>
+          <div className="p-5 rounded-xl bg-slate-900 border border-slate-800">
+            <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Average SERP Rank</span>
+            <div className="text-2xl font-bold text-sky-400 mt-1">
+              #{(seo.trackedKeywords.reduce((acc, k) => acc + k.rank, 0) / seo.trackedKeywords.length).toFixed(1)}
+            </div>
+            <p className="text-xs text-slate-400 mt-2">Top 5 average in Kenya</p>
           </div>
         </div>
 
-        {/* SEO Metrics */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Domain Authority</h4>
-            <p className="text-3xl font-bold text-kesh-green">0</p>
-            <p className="text-xs text-gray-500">Score</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Keywords Tracking</h4>
-            <p className="text-3xl font-bold text-kesh-green">0</p>
-            <p className="text-xs text-gray-500">Count</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Search Visibility</h4>
-            <p className="text-3xl font-bold text-kesh-green">0%</p>
-            <p className="text-xs text-gray-500">Percentage</p>
+        {/* Tracked Keywords Table */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-white">Tracked Search Keywords & Rankings</h2>
+          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="bg-slate-950 text-xs uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th className="px-6 py-4">Target Keyword</th>
+                  <th className="px-6 py-4">SERP Rank</th>
+                  <th className="px-6 py-4">Monthly Search Vol</th>
+                  <th className="px-6 py-4">Difficulty</th>
+                  <th className="px-6 py-4">Landing Page Target</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {seo.trackedKeywords.map((kw, index) => (
+                  <tr key={index} className="hover:bg-slate-800/40 transition">
+                    <td className="px-6 py-4 font-semibold text-white">{kw.keyword}</td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800">
+                        Rank #{kw.rank}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-slate-200">{kw.searchVolume.toLocaleString()} searches</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div className="bg-amber-400 h-full" style={{ width: `${kw.difficulty}%` }}></div>
+                        </div>
+                        <span className="text-xs font-mono">{kw.difficulty}/100</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-mono text-slate-400 truncate max-w-xs">{kw.serpUrl}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-
-        {/* SEO Recommendations */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6 border">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">SEO Recommendations</h3>
-          <ul className="list-disc pl-5 text-gray-600 text-sm">
-            <li>Optimize product titles for target keywords</li>
-            <li>Add meta descriptions to product pages</li>
-            <li>Improve page load speed for better rankings</li>
-            <li>Implement structured data markup</li>
-            <li>Build high-quality backlinks to product pages</li>
-          </ul>
-          <p className="text-xs text-gray-500 mt-4">
-            Run initial OpenSEO sync to populate keyword data
-          </p>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

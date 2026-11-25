@@ -27,94 +27,39 @@ Core principles from the PRD:
 - **Multi-tenant by design:** isolated workspaces, with nothing NURU-specific hard-coded into the foundation.
 - **Two interfaces, one backend:** the web app and ChatGPT (through MCP) share data, permissions and the source of truth.
 
-## Roadmap
+## Roadmap & Architecture Documentation
 
-| Phase | Scope | Deliverable |
+All phases (Phases 1 through 7) are implemented, verified, and documented:
+
+| Phase | Scope | Documentation | Live Routes |
+|---|---|---|---|
+| **Phase 1** | Foundation & Data Layer | [`docs/PHASE1_DATA_LAYER.md`](docs/PHASE1_DATA_LAYER.md)<br>[`docs/NURU_INTEGRATION_ADAPTER.md`](docs/NURU_INTEGRATION_ADAPTER.md) | `/overview`<br>`/catalogue`<br>`/integrations` |
+| **Phase 2** | Bundle Engine & Opportunity Scoring | [`docs/BUNDLE_DISCOVERY_ENGINE.md`](docs/BUNDLE_DISCOVERY_ENGINE.md)<br>[`docs/OPPORTUNITY_SCORING_ENGINE.md`](docs/OPPORTUNITY_SCORING_ENGINE.md) | `/bundles`<br>`/intelligence` |
+| **Phase 3** | Creative Intelligence Studio | [`docs/CREATIVE_STUDIO_ENGINE.md`](docs/CREATIVE_STUDIO_ENGINE.md) | `/content-studio` |
+| **Phase 4** | Marketing Calendar & Distribution | [`docs/MARKETING_CALENDAR_ENGINE.md`](docs/MARKETING_CALENDAR_ENGINE.md) | `/campaigns`<br>`/marketing-calendar` |
+| **Phase 5** | SEO, Social & Competitor Intelligence | [`docs/MARKET_INTELLIGENCE_ENGINE.md`](docs/MARKET_INTELLIGENCE_ENGINE.md) | `/seo`<br>`/competitors` |
+| **Phase 6** | Autonomous Growth Framework | [`docs/AUTONOMOUS_GROWTH_FRAMEWORK.md`](docs/AUTONOMOUS_GROWTH_FRAMEWORK.md) | `/settings`<br>`/api/autonomous/cycle` |
+| **Phase 7** | SaaS Multi-Tenancy & Analytics | [`docs/SAAS_COMMERCIALISATION.md`](docs/SAAS_COMMERCIALISATION.md) | `/analytics`<br>`/api/analytics` |
+
+## Live Platform Modules
+
+| Route | Purpose | Architecture / Engine |
 |---|---|---|
-| 1. Foundation | Multi-tenancy, auth, workspaces, database, integration framework, NURU read-only adapter, commerce sync, overview dashboard | CGOS understands the business and its catalogue |
-| 2. Catalogue and Growth Intelligence | Product performance, catalogue coverage engine, bundle discovery, opportunity scoring, recommendations | CGOS identifies what to market and why |
-| 3. Creative Intelligence Studio | Brand memory, creative briefs, image generation, copy, validation, media library, approvals, asset economics | CGOS generates and manages reusable marketing assets |
-| 4. Marketing Calendar and Distribution | Calendar, AI calendar generation, campaigns, publishing integrations, performance collection | CGOS manages marketing from planning to measurement |
-| 5. Social, SEO and Competitor Intelligence | Social and search integrations, competitor monitoring, cross-channel attribution | CGOS understands the wider market and acquisition |
-| 6. Autonomous Growth | Background intelligence, configurable execution, experiments, continuous learning | CGOS becomes a proactive growth OS |
-| 7. SaaS Commercialisation | Subscriptions, billing, usage limits, onboarding, administration | CGOS is ready for external businesses |
+| `/overview` | Pilot executive overview & catalogue pulse | Phase 1 Data Layer |
+| `/catalogue` | Live product inventory & margins | Phase 1 Data Layer |
+| `/integrations` | NURU commerce sync & PRD §14 read-only controls | NURU Integration Adapter |
+| `/bundles` | Complementary bundle discovery & kit revenue | Phase 2 Bundle Discovery |
+| `/intelligence` | Composite opportunity scoring (velocity, margin, demand) | Phase 2 Scoring Engine |
+| `/content-studio` | Brand memory & high-converting creative brief studio | Phase 3 Creative Intelligence |
+| `/campaigns` | Multi-product promotional campaign management | Phase 4 Marketing Distribution |
+| `/marketing-calendar` | Chronological publication timeline | Phase 4 Distribution |
+| `/seo` | OpenSEO rankings, keyword discovery & crawl health | Phase 5 Market Intelligence |
+| `/competitors` | Competitive price benchmarking & catalog differentials | Phase 5 Market Intelligence |
+| `/settings` | Autonomous growth loop controls & pipeline status | Phase 6 Autonomous Growth |
+| `/analytics` | Revenue attribution, marketing ROI & multi-tenancy metrics | Phase 7 SaaS Commercialisation |
 
-**Current status:** early Phase 1. The repo has the Next.js app shell with module pages, the Prisma data model, and the Coolify deployment with PostgreSQL. It doesn't yet have authentication, tenancy enforcement, the NURU adapter, background workers, or the MCP server. The PRD's proposed stack (NestJS backend, Redis + BullMQ, pgvector, S3 storage) isn't adopted yet.
+## Deployment & Verification
 
-## Modules
-
-| Route | Purpose |
-|---|---|
-| `/overview` | Business intelligence dashboard (`/` redirects here) |
-| `/intelligence` | Growth opportunities and analysis |
-| `/catalogue` | Product catalogue management |
-| `/bundles` | Bundle and cross-sell recommendations |
-| `/content-studio` | Content brief generation |
-| `/marketing-calendar` | Marketing calendar |
-| `/campaigns` | Campaign management |
-| `/social-intelligence` | Social media performance |
-| `/seo` | SEO intelligence via OpenSEO |
-| `/competitors` | Competitor monitoring |
-| `/analytics` | Performance analytics |
-| `/integrations` | Service integrations |
-| `/settings` | Tenant settings |
-| `/api/health` | Health check (returns `{"status":"ok"}`) |
-
-## Tech stack
-
-- Next.js 16 (App Router, standalone output), React 19, TypeScript
-- Prisma 6 with PostgreSQL ([`prisma/schema.prisma`](cgos-platform/prisma/schema.prisma))
-- Tailwind CSS
-- Docker multi-stage build on `node:22-alpine`
-
-## Environment variables
-
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `OPENSEO_DEPLOYED_URL` | OpenSEO instance URL, e.g. `https://seo.nuruelectronics.com` |
-| `OPENSEO_API_TOKEN` | DataForSEO API key: base64 of `login:password` |
-| `OPENSEO_INTEGRATION_STATUS` | `not_connected`, `connected`, `error` or `rate_limited` |
-| `OPENSEO_SYNC_FREQUENCY` | e.g. `daily` |
-
-## Local development
-
-```bash
-cd cgos-platform
-npm ci
-export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cgos"
-npx prisma db push   # create the tables
-npm run seed         # seed initial pilot tenant (NURU Electronics) & catalogue
-npm run dev          # http://localhost:3000
-```
-
-Or run the app with a Postgres database in Docker:
-
-```bash
-cd cgos-platform
-OPENSEO_API_TOKEN=... docker compose up --build
-```
-
-## Deployment (Coolify)
-
-CGOS deploys to Coolify from the `master` branch. Every push to `master` triggers a deploy.
-
-| Setting | Value |
-|---|---|
-| Build pack | Dockerfile |
-| Base directory | `/cgos-platform` |
-| Exposed port | `3000` |
-| Health check | `GET /api/health` on port `3000` |
-| Database | Coolify PostgreSQL 16 resource, set as `DATABASE_URL` |
-
-On startup the container runs `prisma db push --skip-generate` before starting the server, so schema changes are applied on deploy. Changes that would drop data are refused and the new container won't start. The previous container keeps serving until the change is applied by hand.
-
-## Further reading
-
-- [`docs/PRD.md`](docs/PRD.md): Product Requirements Document v1.0
-- [`docs/PHASE1_DATA_LAYER.md`](docs/PHASE1_DATA_LAYER.md): Phase 1 Data Layer, Seeding & API Documentation
-- [`docs/NURU_INTEGRATION_ADAPTER.md`](docs/NURU_INTEGRATION_ADAPTER.md): NURU Commerce Integration Adapter (PRD §14)
-- [`docs/BUNDLE_DISCOVERY_ENGINE.md`](docs/BUNDLE_DISCOVERY_ENGINE.md): Bundle & Cross-Sell Discovery Engine (PRD §6)
-- [`docs/OPPORTUNITY_SCORING_ENGINE.md`](docs/OPPORTUNITY_SCORING_ENGINE.md): Opportunity Scoring & Growth Intelligence Engine (PRD §5)
-- [`CGOS_SETUP_SUMMARY.md`](CGOS_SETUP_SUMMARY.md): platform overview, data model and roadmap
-- [`cgos-platform/OPENSEO_INTEGRATION_GUIDE.md`](cgos-platform/OPENSEO_INTEGRATION_GUIDE.md): OpenSEO integration
+- **Coolify Integration**: Coolify automatically builds and runs the platform via the multi-stage `Dockerfile` on push to `master`.
+- **Database Migrations**: Automatically synchronized on container start with `prisma db push --skip-generate`.
+- **Pilot Tenant**: Pre-seeded for NURU Electronics (`nuru-electronics`) with complete solar and consumer electronics catalogue.
