@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { GlobalNav } from "@/components/navigation/GlobalNav";
 
 export const metadata = {
   title: "CGOS Dashboard - Commerce Growth OS",
@@ -65,36 +66,8 @@ export default async function OverviewPage() {
   const data = await getOverviewData();
 
   return (
-    <div className="min-h-screen bg-gray-50 antialiased">
-      {/* Top Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-md bg-emerald-600 flex items-center justify-center">
-                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Commerce Growth OS</h2>
-                <p className="text-xs text-gray-500">{data.tenantName} &bull; {data.tenantLocation}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/catalogue"
-                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-md border border-emerald-200"
-              >
-                View Catalogue
-              </Link>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Phase 1 Active
-              </span>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gray-50 antialiased pb-16">
+      <GlobalNav currentPath="/overview" />
 
       <main className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Module Shortcuts Bar */}
