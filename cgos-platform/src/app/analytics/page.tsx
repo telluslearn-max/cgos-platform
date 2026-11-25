@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Revenue Metrics -->
+          {/* Revenue Metrics */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Revenue Overview</h3>
             <p className="text-sm text-gray-500">
@@ -32,7 +32,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <!-- Order Metrics -->
+          {/* Order Metrics */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Order Metrics</h3>
             <p className="text-sm text-gray-500">
@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <!-- Conversion Rate -->
+          {/* Conversion Rate */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Conversion Rate</h3>
             <p className="text-sm text-gray-500">
@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <!-- Average Order Value -->
+          {/* Average Order Value */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Average Order Value</h3>
             <p className="text-sm text-gray-500">
@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <!-- Attribution -->
+        {/* Attribution */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Attribution</h3>
           <ul className="list-disc pl-5 text-gray-600 text-sm">

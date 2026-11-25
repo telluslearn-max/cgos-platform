@@ -24,7 +24,7 @@ export default function SettingsPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Tenant Configuration -->
+          {/* Tenant Configuration */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Tenant Configuration</h3>
             <p className="text-sm text-gray-500">
@@ -32,7 +32,7 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <!-- Business Profile -->
+          {/* Business Profile */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Business Profile</h3>
             <p className="text-sm text-gray-500">
@@ -40,7 +40,7 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <!-- Subscription -->
+          {/* Subscription */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Subscription</h3>
             <p className="text-sm text-gray-500">
@@ -48,7 +48,7 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <!-- User Management -->
+          {/* User Management */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">User Management</h3>
             <p className="text-sm text-gray-500">
@@ -57,7 +57,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <!-- Tenant Settings -->
+        {/* Tenant Settings */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Currency</h4>
@@ -71,12 +71,12 @@ export default function SettingsPage() {
           </div>
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Locale</h4>
-            <p className="text-3xl font-bold text-kesh-en">en-KE</p>
+            <p className="text-3xl font-bold text-kesh-green">en-KE</p>
             <p className="text-xs text-gray-500">English Kenya</p>
           </div>
         </div>
 
-        <!-- Tenant Management -->
+        {/* Tenant Management */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Tenant Management</h3>
           <p className="text-sm text-gray-500 text-gray-500">

@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         kesh: "#00a651",
+        "kesh-green": "#00a651",
         "kesh-dark": "#008540",
       },
     },

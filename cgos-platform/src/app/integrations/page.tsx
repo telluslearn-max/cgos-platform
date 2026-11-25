@@ -24,7 +24,7 @@ export default function IntegrationsPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- OpenSEO Integration -->
+          {/* OpenSEO Integration */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">OpenSEO Integration</h3>
             <div className="flex items-start gap-3">
@@ -39,7 +39,7 @@ export default function IntegrationsPage() {
             </p>
           </div>
 
-          <!-- Commerce Platform -->
+          {/* Commerce Platform */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Commerce Platforms</h3>
             <p className="text-sm text-gray-500">
@@ -47,7 +47,7 @@ export default function IntegrationsPage() {
             </p>
           </div>
 
-          <!-- Social Media -->
+          {/* Social Media */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Social Media</h3>
             <p className="text-sm text-gray-500">
@@ -55,7 +55,7 @@ export default function IntegrationsPage() {
             </p>
           </div>
 
-          <!-- Analytics -->
+          {/* Analytics */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Analytics</h3>
             <p className="text-sm text-gray-500">
@@ -64,7 +64,7 @@ export default function IntegrationsPage() {
           </div>
         </div>
 
-        <!-- Integration Status -->
+        {/* Integration Status */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow p-6 border">
             <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Integration Health</h4>
@@ -83,7 +83,7 @@ export default function IntegrationsPage() {
           </div>
         </div>
 
-        <!-- Add New Integration -->
+        {/* Add New Integration */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Add Integration</h3>
           <p className="text-sm text-gray-500 mb-4">

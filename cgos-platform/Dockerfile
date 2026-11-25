@@ -1,34 +1,29 @@
-FROM node:22-alpine AS builder
-
+FROM node:22-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache libc6-compat openssl
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install dependencies
-COPY package.json package-lock ./
-RUN npm install
-
-# Copy source code
+FROM node:22-alpine AS builder
+WORKDIR /app
+RUN apk add --no-cache openssl
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Build Next.js app
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# Production stage
-FROM node:22-alpine
-
+FROM node:22-alpine AS runner
 WORKDIR /app
-
-# Copy built assets from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next-config.js ./
-COPY --from=builder /app/.env .env
-
-# Copy package.json and install production deps
-COPY package.json package-lock ./
-RUN npm install --production
-
-# Expose port 80 (Next.js will listen on this port)
-EXPOSE 80
-
-# Start Next.js server on port 80
-CMD ["npm", "start"]
+RUN apk add --no-cache openssl wget
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+USER nextjs
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+CMD ["node", "server.js"]

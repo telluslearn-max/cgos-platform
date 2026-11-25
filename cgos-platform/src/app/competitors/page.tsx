@@ -24,7 +24,7 @@ export default function CompetitorsPage() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Competitor Overview -->
+          {/* Competitor Overview */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Monitored Competitors</h3>
             <p className="text-sm text-gray-500">
@@ -39,7 +39,7 @@ export default function CompetitorsPage() {
             </p>
           </div>
 
-          <!-- Pricing Comparison -->
+          {/* Pricing Comparison */}
           <div className="bg-white rounded-lg shadow p-6 border">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Pricing Comparison</h3>
             <p className="text-sm text-gray-500">
@@ -55,7 +55,7 @@ export default function CompetitorsPage() {
           </div>
         </div>
 
-        <!-- Competitor List -->
+        {/* Competitor List */}
         <div className="mt-6 bg-white rounded-lg shadow p-6 border">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Competitor Analysis</h3>
           <p className="text-sm text-gray-500 text-gray-500">
