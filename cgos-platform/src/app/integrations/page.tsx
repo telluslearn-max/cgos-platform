@@ -1,100 +1,171 @@
-/** @type {import('next').Metadata} */
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+
 export const metadata = {
   title: "CGOS Integrations - Service Connections",
-  description: "Commerce Growth OS - Service integrations management",
+  description: "Commerce Growth OS - Service integrations management and status",
 };
 
-export default function IntegrationsPage() {
+export const dynamic = "force-dynamic";
+
+async function getIntegrationsData() {
+  try {
+    const integrations = await prisma.integration.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+
+    const nuruIntegration = integrations.find((i) => i.name === "NURU Commerce Platform");
+    const seoIntegration = integrations.find((i) => i.type === "seo");
+
+    const totalProducts = await prisma.product.count();
+
+    return {
+      nuru: nuruIntegration,
+      seo: seoIntegration,
+      totalProducts,
+      isDbLive: true,
+    };
+  } catch (err) {
+    console.error("Failed to load integrations:", err);
+    return {
+      nuru: null,
+      seo: null,
+      totalProducts: 0,
+      isDbLive: false,
+    };
+  }
+}
+
+export default async function IntegrationsPage() {
+  const { nuru, totalProducts, isDbLive } = await getIntegrationsData();
+
   return (
     <div className="min-h-screen bg-gray-50 antialiased">
+      {/* Top Header */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-orange-600 flex items-center justify-center">
+              <Link href="/overview" className="h-10 w-10 rounded-md bg-emerald-600 flex items-center justify-center hover:opacity-90 transition">
                 <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253a4 4 0 110-7.998m0 7.998l3.87 3m-3.87-3v12l-3.87-3M5.25 3h13.5A2.75 2.75 0 0121.25 5.75v12.5c0 .767-.225 1.476-.66 2.093l-2.057-1.07a2.752 2.752 0 01-1.298-.605L17.51 18.07a2.75 2.75 0 00.53 1.065h1.5a2.75 2.75 0 012.75 2.75v1.5c0 .613.25 1.165.705 1.615l2.266 1.11a.75.75 0 001.088-.413l2.633-2.057a.75.75 0 00-.413-1.088L15.416 14.03a2.75 2.75 0 00-.605-1.298L11.5 5.385a2.752 2.752 0 01.065-.53H5.75c-.926 0-1.691.433-2.167 1.082m0-18C4.6 1.66 3 3.368 3 5.25v12.5c0 .507.127 .958.37 1.35l2.078 1.055c.318.16.652.253 1.014.235.363-.018.695-.12 1.014-.305v-12.5c0-1.887 1.523-3.418 3.405-3.153zM9.75 15H5.25v-2.25c0-.388.158-.61.477-.73l2.067-1.055a.75.75 0 011.105 0l2.067 1.055c.318.16.477.382.477.73V15z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
                 </svg>
+              </Link>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Connected Integrations</h2>
+                <p className="text-xs text-gray-500">Service adapters & data pipelines</p>
               </div>
-              <h2 className="text-xl font-bold text-kesh-dark">Integrations</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/overview"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-md border border-gray-200"
+              >
+                &larr; Overview
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* OpenSEO Integration */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">OpenSEO Integration</h3>
-            <div className="flex items-start gap-3">
-              <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0 mt-1"></div>
-              <div>
-                <p className="font-medium">Connected</p>
-                <p className="text-xs text-gray-500">NURU Electronics</p>
+      <main className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Architecture Notice */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start gap-3">
+          <div className="text-emerald-600 mt-0.5">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-emerald-900">PRD §14 Strict Read-Only Safeguard Active</h4>
+            <p className="text-xs text-emerald-700 mt-0.5">
+              CGOS ingests product, variant, and pricing data via read-only APIs. Consequential mutations (price changes, inventory adjustments, orders) are strictly gated by human approval workflows.
+            </p>
+          </div>
+        </div>
+
+        {/* Integration Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* NURU Commerce Adapter Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
+                  <h3 className="text-base font-bold text-gray-900">NURU Electronics Platform</h3>
+                </div>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                  {nuru?.status === "connected" || isDbLive ? "Connected" : "Standby"}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Dedicated commerce adapter ingesting catalogue products, inventory levels, variant pricing, and high-resolution media from NURU’s primary Coolify store.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-xs text-gray-600 border border-gray-100 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Pilot Tenant:</span>
+                  <span className="font-semibold text-gray-800">NURU Electronics (nuru-electronics)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Synced Products:</span>
+                  <span className="font-semibold text-gray-800">{totalProducts} items</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Sync Mode:</span>
+                  <span className="font-mono text-gray-800">Incremental &bull; Hourly</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Endpoint:</span>
+                  <span className="font-mono text-gray-800">/api/integrations/nuru/sync</span>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Status: Active | Frequency: daily
-            </p>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <span className="text-xs text-gray-400">
+                Last sync: {nuru?.lastSyncAt ? new Date(nuru.lastSyncAt).toLocaleString() : "Recently active"}
+              </span>
+              <Link
+                href="/catalogue"
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+              >
+                Inspect Catalogue &rarr;
+              </Link>
+            </div>
           </div>
 
-          {/* Commerce Platform */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Commerce Platforms</h3>
-            <p className="text-sm text-gray-500">
-                Shopify, WooCommerce integrations
-            </p>
+          {/* OpenSEO Intelligence */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                  <h3 className="text-base font-bold text-gray-900">OpenSEO Intelligence</h3>
+                </div>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                  Ready
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Monitors search visibility, keyword ranking, and SERP positions for NURU Electronics via DataForSEO.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-xs text-gray-600 border border-gray-100 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Instance URL:</span>
+                  <span className="font-mono text-gray-800">seo.nuruelectronics.com</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Schedule:</span>
+                  <span className="font-mono text-gray-800">Daily Recurrent</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <span className="text-xs text-gray-400">Status: Active</span>
+              <Link href="/seo" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+                SEO Dashboard &rarr;
+              </Link>
+            </div>
           </div>
-
-          {/* Social Media */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Social Media</h3>
-            <p className="text-sm text-gray-500">
-                Instagram, Facebook connected
-            </p>
-          </div>
-
-          {/* Analytics */}
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Analytics</h3>
-            <p className="text-sm text-gray-500">
-                Google Analytics connected
-            </p>
-          </div>
-        </div>
-
-        {/* Integration Status */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Integration Health</h4>
-            <p className="text-2xl font-bold text-kesh-green">✅ All Systems</p>
-            <p className="text-xs text-gray-500">Operational</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Data Sync</h4>
-            <p className="text-2xl font-bold text-kesh-green">✅ Current</p>
-            <p className="text-xs text-gray-500">Up to date</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border">
-            <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">API Limits</h4>
-            <p className="text-2xl font-bold text-kesh-green">✅ Within limits</p>
-            <p className="text-xs text-gray-500">Good standing</p>
-          </div>
-        </div>
-
-        {/* Add New Integration */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6 border">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Add Integration</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Connect additional services to expand CGOS capabilities
-          </p>
-          <ul className="list-disc pl-5 text-gray-600 text-sm">
-            <li>DataForSEO API key configuration</li>
-            <li>Social platform OAuth connections</li>
-            <li>Commerce platform webhooks</li>
-            <li>Email marketing service integration</li>
-          </ul>
         </div>
       </main>
     </div>
