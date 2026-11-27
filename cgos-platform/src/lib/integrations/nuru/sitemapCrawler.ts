@@ -139,7 +139,7 @@ export async function crawlAndSyncFullNuruSitemap(): Promise<{
     new Set(
       matches
         .map((m) => m[1])
-        .filter((slug): slug is string => Boolean(slug) && slug.trim().length > 0)
+        .filter((slug): slug is string => typeof slug === "string" && slug.trim().length > 0)
     )
   );
 
