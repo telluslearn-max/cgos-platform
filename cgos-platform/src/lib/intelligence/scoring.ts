@@ -110,7 +110,27 @@ export async function runOpportunityScoring(tenantSlug = "nuru-electronics") {
     where: { tenantId: tenant.id },
   });
 
+  const existingAnalyses = await prisma.productAnalysis.findMany({
+    where: { productId: { in: products.map((p) => p.id) } },
+    select: { id: true, productId: true },
+  });
+  const existingMap = new Map(existingAnalyses.map((a) => [a.productId, a.id]));
+
   const scoredSummaries: ScoredProductSummary[] = [];
+  const toCreate: Array<{
+    productId: string;
+    opportunityScore: number;
+    bundlePotential: number;
+    lifecycleCategory: string;
+    marketingStatus: string;
+  }> = [];
+  const toUpdate: Array<{
+    id: string;
+    opportunityScore: number;
+    bundlePotential: number;
+    lifecycleCategory: string;
+    marketingStatus: string;
+  }> = [];
 
   for (const product of products) {
     const analysis = calculateOpportunityScore({
@@ -121,30 +141,22 @@ export async function runOpportunityScoring(tenantSlug = "nuru-electronics") {
       category: product.category,
     });
 
-    // Update ProductAnalysis
-    const existingAnalysis = await prisma.productAnalysis.findFirst({
-      where: { productId: product.id },
-    });
-
-    if (existingAnalysis) {
-      await prisma.productAnalysis.update({
-        where: { id: existingAnalysis.id },
-        data: {
-          opportunityScore: analysis.opportunityScore,
-          bundlePotential: analysis.bundlePotential,
-          lifecycleCategory: analysis.lifecycleCategory,
-          marketingStatus: "scored",
-        },
+    const existingId = existingMap.get(product.id);
+    if (existingId) {
+      toUpdate.push({
+        id: existingId,
+        opportunityScore: analysis.opportunityScore,
+        bundlePotential: analysis.bundlePotential,
+        lifecycleCategory: analysis.lifecycleCategory,
+        marketingStatus: "scored",
       });
     } else {
-      await prisma.productAnalysis.create({
-        data: {
-          productId: product.id,
-          opportunityScore: analysis.opportunityScore,
-          bundlePotential: analysis.bundlePotential,
-          lifecycleCategory: analysis.lifecycleCategory,
-          marketingStatus: "scored",
-        },
+      toCreate.push({
+        productId: product.id,
+        opportunityScore: analysis.opportunityScore,
+        bundlePotential: analysis.bundlePotential,
+        lifecycleCategory: analysis.lifecycleCategory,
+        marketingStatus: "scored",
       });
     }
 
@@ -164,6 +176,30 @@ export async function runOpportunityScoring(tenantSlug = "nuru-electronics") {
       marketingStatus: "ready_for_action",
       recommendedAction: analysis.recommendedAction,
     });
+  }
+
+  if (toCreate.length > 0) {
+    await prisma.productAnalysis.createMany({
+      data: toCreate,
+      skipDuplicates: true,
+    });
+  }
+
+  for (let i = 0; i < toUpdate.length; i += 50) {
+    const chunk = toUpdate.slice(i, i + 50);
+    await prisma.$transaction(
+      chunk.map((item) =>
+        prisma.productAnalysis.update({
+          where: { id: item.id },
+          data: {
+            opportunityScore: item.opportunityScore,
+            bundlePotential: item.bundlePotential,
+            lifecycleCategory: item.lifecycleCategory,
+            marketingStatus: item.marketingStatus,
+          },
+        })
+      )
+    );
   }
 
   // Create GrowthRecommendation records for top opportunities

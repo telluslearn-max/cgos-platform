@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NuruCommerceClient } from "./client";
 import { NuruSyncResult } from "./types";
+import { crawlAndSyncFullNuruSitemap } from "./sitemapCrawler";
 
 export async function syncNuruCatalogue(tenantSlug = "nuru-electronics"): Promise<NuruSyncResult> {
   const errors: string[] = [];
@@ -197,6 +198,14 @@ export async function syncNuruCatalogue(tenantSlug = "nuru-electronics"): Promis
       console.error(msg);
       errors.push(msg);
     }
+  }
+
+  // 4b. Crawl full live storefront sitemap for any new or unpublished SKUs
+  try {
+    const crawlStats = await crawlAndSyncFullNuruSitemap();
+    syncedProducts += crawlStats.newlyAdded;
+  } catch (crawlErr) {
+    console.warn("Sitemap crawl skipped during sync:", crawlErr);
   }
 
   // 5. Update Integration record with completion status

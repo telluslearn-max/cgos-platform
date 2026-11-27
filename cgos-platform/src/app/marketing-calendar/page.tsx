@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCalendarSchedule, getCampaigns } from "@/lib/distribution/campaigns";
+import { GlobalNav } from "@/components/navigation/GlobalNav";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,9 @@ export default async function MarketingCalendarPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20">
+      <GlobalNav currentPath="/marketing-calendar" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
         {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div>

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { GlobalNav } from "@/components/navigation/GlobalNav";
 
 export const metadata = {
-  title: "CGOS Intelligence - Growth Opportunities & Scoring",
+  title: "Intelligence | CGOS — NURU Electronics",
   description: "Commerce Growth OS - Algorithmic opportunity scoring and product performance intelligence",
 };
 
@@ -15,7 +16,7 @@ async function getIntelligenceData() {
     });
 
     if (!tenant) {
-      return { products: [], recommendations: [], stats: { total: 0, avgScore: 0, heroCount: 0, highMarginCount: 0 }, isLiveDb: false };
+      return { products: [], recommendations: [], stats: { total: 0, avgScore: 0, heroCount: 0, highMarginCount: 0 } };
     }
 
     const [products, analyses, recommendations] = await Promise.all([
@@ -37,6 +38,7 @@ async function getIntelligenceData() {
       prisma.growthRecommendation.findMany({
         where: { tenantId: tenant.id },
         orderBy: { priority: "desc" },
+        take: 6,
       }),
     ]);
 
@@ -45,18 +47,16 @@ async function getIntelligenceData() {
     const scoredProducts = products.map((p) => {
       const analysis = analysisMap.get(p.id);
       const selling = Number(p.sellingPrice);
-      const cost = p.costPrice ? Number(p.costPrice) : selling * 0.8;
-      const margin = selling > 0 ? Math.round(((selling - cost) / selling) * 1000) / 10 : 20;
+      const cost = p.costPrice ? Number(p.costPrice) : selling * 0.76;
+      const margin = selling > 0 ? Math.round(((selling - cost) / selling) * 1000) / 10 : 24;
 
       return {
         ...p,
         sellingPrice: selling,
-        costPrice: p.costPrice ? Number(p.costPrice) : null,
         grossMarginPercent: margin,
         opportunityScore: analysis ? Number(analysis.opportunityScore) : 75.0,
         bundlePotential: analysis ? Number(analysis.bundlePotential) : 70.0,
         lifecycleCategory: analysis?.lifecycleCategory || "volume_driver",
-        marketingStatus: analysis?.marketingStatus || "active",
       };
     });
 
@@ -65,18 +65,15 @@ async function getIntelligenceData() {
     const total = scoredProducts.length;
     const avgScore =
       total > 0
-        ? Math.round(
-            (scoredProducts.reduce((acc, p) => acc + p.opportunityScore, 0) / total) * 10
-          ) / 10
+        ? Math.round((scoredProducts.reduce((acc, p) => acc + p.opportunityScore, 0) / total) * 10) / 10
         : 0;
     const heroCount = scoredProducts.filter((p) => p.lifecycleCategory === "hero_product").length;
     const highMarginCount = scoredProducts.filter((p) => p.grossMarginPercent >= 20).length;
 
     return {
-      products: scoredProducts,
+      products: scoredProducts.slice(0, 100),
       recommendations,
       stats: { total, avgScore, heroCount, highMarginCount },
-      isLiveDb: true,
     };
   } catch (error) {
     console.error("Failed to load intelligence data:", error);
@@ -84,235 +81,103 @@ async function getIntelligenceData() {
       products: [],
       recommendations: [],
       stats: { total: 0, avgScore: 0, heroCount: 0, highMarginCount: 0 },
-      isLiveDb: false,
     };
   }
 }
 
 export default async function IntelligencePage() {
-  const { products, recommendations, stats, isLiveDb } = await getIntelligenceData();
+  const { products, recommendations, stats } = await getIntelligenceData();
 
   return (
-    <div className="min-h-screen bg-gray-50 antialiased">
-      {/* Top Header */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/overview" className="h-10 w-10 rounded-md bg-indigo-600 flex items-center justify-center hover:opacity-90 transition">
-                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </Link>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Catalogue Growth Intelligence</h2>
-                <p className="text-xs text-gray-500">NURU Electronics &bull; Opportunity Scoring & Recommendations</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/bundles"
-                className="text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 px-3 py-1.5 rounded-md border border-purple-200"
-              >
-                Bundle Engine &rarr;
-              </Link>
-              <Link
-                href="/overview"
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-md border border-gray-200"
-              >
-                &larr; Overview
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20">
+      <GlobalNav currentPath="/intelligence" />
 
-      <main className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* PRD Safeguard Banner */}
-        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex items-start gap-3">
-          <div className="text-indigo-600 mt-0.5">
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2v-6a2 2 0 00-2-2h2a2 2 0 002-2V5a2 2 0 00-2-2H11a2 2 0 00-2 2v6m12 4h-2m0 0h-2m2 0a2 2 0 100-4h2a2 2 0 100 4zm-2-6a2 2 0 11-4 0 2 2 0 014 0zM5 7a2 2 0 11-4 0 2 2 0 014 0zM3 15a2 2 0 11-2-2H1a2 2 0 112-2h12a2 2 0 112 2h-1M9 10v10m-7 0V5m7 0v5-3.5 3.5M15.5 15.5l3.5 3.5m1.4-1.4l-3.5-3.5M5 15a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-indigo-900">PRD §5 Continuous Opportunity Scoring</h4>
-            <p className="text-xs text-indigo-700 mt-0.5">
-              CGOS evaluates catalogue items across gross margin, stock runway, and commercial momentum. Products with score &ge; 88.0 are ranked as <strong>Hero Products</strong> to lead upcoming marketing sprints.
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800/80 pb-6">
+          <div className="space-y-1">
+            <span className="text-xs font-mono text-zinc-400">Phase 2 Intelligence</span>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">Opportunity Scoring Matrix</h1>
+            <p className="text-xs text-zinc-400">
+              Composite commercial ranking across margin, inventory depth, and bundle compatibility
             </p>
           </div>
+          <Link
+            href="/bundles"
+            className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors"
+          >
+            View Bundles &rarr;
+          </Link>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Catalogue Evaluated</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total} Products</p>
-            <p className="text-xs text-gray-400 mt-0.5">100% coverage tracked</p>
+          <div className="p-5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span className="text-xs text-zinc-400">Products Evaluated</span>
+            <div className="text-2xl font-semibold text-white mt-1.5 font-mono">{stats.total}</div>
           </div>
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Opportunity Score</p>
-            <p className="text-2xl font-bold text-indigo-600 mt-1">{stats.avgScore} / 100</p>
-            <p className="text-xs text-gray-400 mt-0.5">Weighted commercial rating</p>
+          <div className="p-5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span className="text-xs text-zinc-400">Average Score</span>
+            <div className="text-2xl font-semibold text-emerald-400 mt-1.5 font-mono">{stats.avgScore} / 100</div>
           </div>
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hero Products</p>
-            <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.heroCount}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Score &ge; 88 &bull; Ample stock</p>
+          <div className="p-5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span className="text-xs text-zinc-400">Hero Products</span>
+            <div className="text-2xl font-semibold text-white mt-1.5 font-mono">{stats.heroCount}</div>
           </div>
-          <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">High Margin Stock</p>
-            <p className="text-2xl font-bold text-purple-600 mt-1">{stats.highMarginCount}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Gross margin &ge; 20%</p>
+          <div className="p-5 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+            <span className="text-xs text-zinc-400">High-Margin SKUs (&ge;20%)</span>
+            <div className="text-2xl font-semibold text-white mt-1.5 font-mono">{stats.highMarginCount}</div>
           </div>
         </div>
 
-        {/* Strategic Growth Recommendations */}
         {recommendations.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <h3 className="text-base font-bold text-gray-900 mb-4">Strategic Action Items</h3>
-            <div className="space-y-3">
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-white">Autonomous Priority Recommendations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-800 uppercase">
-                        {rec.type}
-                      </span>
-                      <h4 className="text-sm font-bold text-gray-900">{rec.title}</h4>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1">{rec.description}</p>
+                <div key={rec.id} className="p-4 rounded-lg bg-zinc-900/40 border border-zinc-800/80 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-xs text-white">{rec.title}</span>
+                    <span className="text-[11px] font-mono text-emerald-400">Priority {Number(rec.priority)}</span>
                   </div>
-                  <div className="flex items-center gap-3 self-end sm:self-center">
-                    <span className="text-xs font-mono font-bold text-emerald-600">
-                      Priority: {Number(rec.priority).toFixed(1)}
-                    </span>
-                    <Link
-                      href="/campaigns"
-                      className="text-xs font-semibold px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition"
-                    >
-                      Act Now
-                    </Link>
-                  </div>
+                  <p className="text-xs text-zinc-400">{rec.description}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Opportunity Scoring Table */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-gray-900">Product Opportunity Matrix</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Ranked from highest commercial marketing potential</p>
-            </div>
-            <span className="text-xs font-semibold text-gray-400">
-              {isLiveDb ? "Database Connected" : "Connecting..."}
-            </span>
-          </div>
-
-          {products.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-                <thead className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wider">
-                  <tr>
-                    <th className="px-6 py-3 font-semibold">Rank & Product</th>
-                    <th className="px-6 py-3 font-semibold">Opportunity Score</th>
-                    <th className="px-6 py-3 font-semibold">Gross Margin</th>
-                    <th className="px-6 py-3 font-semibold">Inventory Runway</th>
-                    <th className="px-6 py-3 font-semibold">Lifecycle Segment</th>
-                    <th className="px-6 py-3 font-semibold text-right">Action</th>
+        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-zinc-900/80 text-zinc-400 border-b border-zinc-800/80 font-medium">
+                <tr>
+                  <th className="py-3 px-4">Rank</th>
+                  <th className="py-3 px-4">Product</th>
+                  <th className="py-3 px-4">Lifecycle</th>
+                  <th className="py-3 px-4 text-right">Price</th>
+                  <th className="py-3 px-4 text-right">Margin</th>
+                  <th className="py-3 px-4 text-right">Stock</th>
+                  <th className="py-3 px-4 text-right">Opportunity Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60 font-mono">
+                {products.map((p, idx) => (
+                  <tr key={p.id} className="hover:bg-zinc-900/60 transition-colors">
+                    <td className="py-3 px-4 text-zinc-500">#{idx + 1}</td>
+                    <td className="py-3 px-4 font-sans font-medium text-zinc-100">{p.title}</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px]">
+                        {p.lifecycleCategory.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right text-zinc-200">KES {p.sellingPrice.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-right text-zinc-300">{p.grossMarginPercent}%</td>
+                    <td className="py-3 px-4 text-right text-zinc-400">{p.stockQuantity}</td>
+                    <td className="py-3 px-4 text-right font-semibold text-emerald-400">{p.opportunityScore}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {products.map((p, idx) => (
-                    <tr key={p.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold font-mono text-gray-400 w-5">#{idx + 1}</span>
-                          <div>
-                            <div className="font-semibold text-gray-900">{p.title}</div>
-                            <div className="text-xs text-gray-500">{p.category} &bull; <span className="font-mono">{p.sku}</span></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`font-extrabold text-sm ${
-                              p.opportunityScore >= 88
-                                ? "text-emerald-600"
-                                : p.opportunityScore >= 80
-                                ? "text-indigo-600"
-                                : "text-amber-600"
-                            }`}
-                          >
-                            {p.opportunityScore.toFixed(1)}
-                          </span>
-                          <div className="w-16 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                            <div
-                              className={`h-1.5 rounded-full ${
-                                p.opportunityScore >= 88
-                                  ? "bg-emerald-500"
-                                  : p.opportunityScore >= 80
-                                  ? "bg-indigo-500"
-                                  : "bg-amber-500"
-                              }`}
-                              style={{ width: `${p.opportunityScore}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-gray-800">
-                        {p.grossMarginPercent}%
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
-                            p.stockQuantity >= 10
-                              ? "bg-green-100 text-green-800"
-                              : p.stockQuantity >= 5
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {p.stockQuantity} in stock
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase ${
-                            p.lifecycleCategory === "hero_product"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : p.lifecycleCategory === "high_margin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {p.lifecycleCategory.replace("_", " ")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link
-                          href="/bundles"
-                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
-                        >
-                          Find Bundles &rarr;
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-12 text-center">
-              <p className="text-sm text-gray-500">
-                Run <code className="text-xs bg-gray-100 px-2 py-0.5 rounded font-mono">npm run seed</code> or trigger scoring via <code className="text-xs bg-gray-100 px-2 py-0.5 rounded font-mono">POST /api/intelligence</code>.
-              </p>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>

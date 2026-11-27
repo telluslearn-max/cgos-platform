@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { GlobalNav } from "@/components/navigation/GlobalNav";
 
 export const metadata = {
-  title: "Live Catalogue & Stock Intelligence | NURU Electronics",
+  title: "Catalogue | CGOS — NURU Electronics",
   description: "Commerce Growth OS - Real-time inventory status, margins, and stock intelligence",
 };
 
@@ -11,12 +11,13 @@ export const dynamic = "force-dynamic";
 
 async function getProducts() {
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
-
-    const totalCount = await prisma.product.count();
+    const [products, totalCount] = await Promise.all([
+      prisma.product.findMany({
+        orderBy: [{ stockQuantity: "desc" }, { createdAt: "desc" }],
+        take: 150,
+      }),
+      prisma.product.count(),
+    ]);
 
     return {
       products: products.map((p) => ({
@@ -41,54 +42,56 @@ export default async function CataloguePage() {
   const { products, totalCount, isLiveDb } = await getProducts();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased pb-20 selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 antialiased pb-20">
       <GlobalNav currentPath="/catalogue" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
-        {/* Header / Stats */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800/80 pb-6">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-              <h1 className="text-2xl font-extrabold text-white">Live Storefront Catalogue</h1>
-            </div>
-            <p className="text-xs text-slate-400">
-              Showing <strong className="text-white">{products.length}</strong> of <strong className="text-emerald-400">{totalCount}</strong> indexed hardware SKUs from NURU Electronics.
+            <span className="text-xs font-mono text-zinc-400">
+              Inventory &bull; {isLiveDb ? "Connected" : "Offline"}
+            </span>
+            <h1 className="text-2xl font-semibold tracking-tight text-white">Product Catalogue</h1>
+            <p className="text-xs text-zinc-400">
+              Displaying <span className="text-white font-mono">{products.length}</span> of{" "}
+              <span className="text-emerald-400 font-mono">{totalCount}</span> indexed NURU Electronics SKUs.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800">
-              {isLiveDb ? "Database Connected" : "Connecting..."}
-            </span>
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/integrations"
+              className="px-3.5 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 font-medium text-xs transition-colors"
+            >
+              Sync Sitemap
+            </Link>
             <Link
               href="/intelligence"
-              className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition"
+              className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-colors"
             >
-              Analyze Opportunities &rarr;
+              Opportunity Matrix
             </Link>
           </div>
         </div>
 
-        {/* Product Table */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden shadow-sm">
+        <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-zinc-900/80 text-zinc-400 border-b border-zinc-800/80 font-medium">
                 <tr>
-                  <th className="py-3.5 px-4">Product Title</th>
-                  <th className="py-3.5 px-3">Brand</th>
-                  <th className="py-3.5 px-3">Category</th>
-                  <th className="py-3.5 px-4">Selling Price</th>
-                  <th className="py-3.5 px-3">Wholesale Margin</th>
-                  <th className="py-3.5 px-3">Stock Units</th>
-                  <th className="py-3.5 px-3">Status</th>
+                  <th className="py-3 px-4">Product</th>
+                  <th className="py-3 px-4">Brand</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4 text-right">Selling Price</th>
+                  <th className="py-3 px-4 text-right">Est. Margin</th>
+                  <th className="py-3 px-4 text-right">Stock</th>
+                  <th className="py-3 px-4 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80 font-mono">
+              <tbody className="divide-y divide-zinc-800/60">
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400 font-sans text-sm">
-                      No products found in catalogue. Ingestion in progress.
+                    <td colSpan={7} className="py-12 text-center text-zinc-500">
+                      No products found in catalogue.
                     </td>
                   </tr>
                 ) : (
@@ -97,22 +100,20 @@ export default async function CataloguePage() {
                       ? Math.round(((p.sellingPrice - p.costPrice) / p.sellingPrice) * 1000) / 10
                       : 24.0;
                     return (
-                      <tr key={p.id} className="hover:bg-slate-800/40 transition font-sans">
-                        <td className="py-3.5 px-4 font-semibold text-white">
-                          <div className="flex items-center gap-2">
-                            <span>{p.title}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-mono block">{p.sku || p.handle}</span>
+                      <tr key={p.id} className="hover:bg-zinc-900/60 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-zinc-100">{p.title}</div>
+                          <div className="text-[11px] text-zinc-500 font-mono">{p.sku || p.handle}</div>
                         </td>
-                        <td className="py-3.5 px-3 text-slate-300 font-medium">{p.brand || "NURU"}</td>
-                        <td className="py-3.5 px-3 text-slate-400 text-xs">{p.category || "Electronics"}</td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                        <td className="py-3 px-4 text-zinc-300">{p.brand || "NURU"}</td>
+                        <td className="py-3 px-4 text-zinc-400">{p.category || "Electronics"}</td>
+                        <td className="py-3 px-4 text-right font-mono text-zinc-100">
                           KES {p.sellingPrice.toLocaleString()}
                         </td>
-                        <td className="py-3.5 px-3 font-mono text-sky-400">{margin}%</td>
-                        <td className="py-3.5 px-3 font-mono text-slate-300">{p.stockQuantity} units</td>
-                        <td className="py-3.5 px-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800 uppercase">
+                        <td className="py-3 px-4 text-right font-mono text-emerald-400">{margin}%</td>
+                        <td className="py-3 px-4 text-right font-mono text-zinc-300">{p.stockQuantity}</td>
+                        <td className="py-3 px-4 text-right">
+                          <span className="inline-flex px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-[10px] uppercase">
                             {p.status}
                           </span>
                         </td>
